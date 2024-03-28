@@ -12,6 +12,8 @@ func main() {
 		Handler: corsMux,
 	}
 
+	server.ListenAndServe()
+
 }
 
 func middlewareCors(next http.Handler) http.Handler {
