@@ -12,8 +12,7 @@ func main() {
 	var apiCfg apiConfig
 	mux := http.NewServeMux()
 
-	mux.Handle("/app/*", http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
-	mux.Handle("/app/*", apiCfg.midlewareMetricsInc(mux))
+	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 	mux.HandleFunc("/healthz", healthHandler)
 
 	corsMux := middlewareCors(mux)
@@ -32,10 +31,11 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+/*
 func counterHandler(w http.ResponseWriter, r *http.Request) {
 
 }
-
+*/
 func middlewareCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
