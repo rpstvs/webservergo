@@ -5,16 +5,24 @@ import "net/http"
 func main() {
 
 	mux := http.NewServeMux()
+
+	mux.Handle("/app/*", http.StripPrefix("/app", http.FileServer(http.Dir("."))))
+	mux.HandleFunc("/healthz", healthHandler)
+
 	corsMux := middlewareCors(mux)
 
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: corsMux,
 	}
-	mux.Handle("/", http.FileServer(http.Dir(".")))
-	mux.Handle("/assets/", http.FileServer(http.Dir(".")))
 	server.ListenAndServe()
 
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 func middlewareCors(next http.Handler) http.Handler {
