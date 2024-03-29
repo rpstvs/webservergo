@@ -3,16 +3,18 @@ package main
 import "net/http"
 
 func main() {
+	const port = "8080"
+	const filepathRoot = "."
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/app/*", http.StripPrefix("/app", http.FileServer(http.Dir("."))))
+	mux.Handle("/app/*", http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
 	mux.HandleFunc("/healthz", healthHandler)
 
 	corsMux := middlewareCors(mux)
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: corsMux,
 	}
 	server.ListenAndServe()
