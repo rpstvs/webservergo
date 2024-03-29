@@ -12,6 +12,7 @@ func main() {
 		Handler: corsMux,
 	}
 	mux.Handle("/", http.FileServer(http.Dir(".")))
+	mux.Handle("/assets/", http.FileServer(http.Dir(".")))
 	server.ListenAndServe()
 
 }
