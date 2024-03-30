@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type apiConfig struct {
 	fileserverHits int
@@ -14,6 +17,8 @@ func main() {
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 	mux.HandleFunc("/healthz", healthHandler)
+	mux.HandleFunc("/metrics", apiCfg.counterHandler)
+	mux.HandleFunc("/reset", apiCfg.resetCounterHits)
 
 	corsMux := middlewareCors(mux)
 
@@ -31,11 +36,15 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-/*
-func counterHandler(w http.ResponseWriter, r *http.Request) {
-
+func (apic *apiConfig) counterHandler(w http.ResponseWriter, r *http.Request) {
+	tmp := fmt.Sprintf("Hits: %d", apic.fileserverHits)
+	w.Write([]byte(tmp))
 }
-*/
+
+func (apic *apiConfig) resetCounterHits(w http.ResponseWriter, r *http.Request) {
+	apic.fileserverHits = 0
+}
+
 func middlewareCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
