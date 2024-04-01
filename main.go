@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -15,9 +16,9 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
-	mux.Handle("GET /admin/metrics", http.FileServer(http.Dir(".")))
+	//mux.Handle("GET /admin/metrics", http.FileServer(http.Dir(".")))
 	mux.HandleFunc("GET /api/healthz", healthHandler)
-
+	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
 	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
 
 	corsMux := middlewareCors(mux)
@@ -31,21 +32,25 @@ func main() {
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
 
-/*
-func (apic *apiConfig) counterHandler(next http.Handler) http.Handler {
-	tmp := fmt.Sprintf("Hits: %d", apic.fileserverHits)
+func (apic *apiConfig) counterHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	tmp := fmt.Sprintf(`<html>
+
+	<body>
+		<h1>Welcome, Chirpy Admin</h1>
+		<p>Chirpy has been visited %d times!</p>
+	</body>
+	
+	</html>`, apic.fileserverHits)
 	w.Write([]byte(tmp))
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	})
 }
-*/
 
 func (apic *apiConfig) resetCounterHits(w http.ResponseWriter, r *http.Request) {
 	apic.fileserverHits = 0
