@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -20,6 +19,7 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", healthHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
 	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
+	mux.HandleFunc("POST /api/validate_chirp")
 
 	corsMux := middlewareCors(mux)
 
@@ -31,31 +31,6 @@ func main() {
 
 }
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-}
-
-func (apic *apiConfig) counterHandler(w http.ResponseWriter, r *http.Request) {
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tmp := fmt.Sprintf(`<html>
-
-	<body>
-		<h1>Welcome, Chirpy Admin</h1>
-		<p>Chirpy has been visited %d times!</p>
-	</body>
-	
-	</html>`, apic.fileserverHits)
-	w.Write([]byte(tmp))
-
-}
-
-func (apic *apiConfig) resetCounterHits(w http.ResponseWriter, r *http.Request) {
-	apic.fileserverHits = 0
-}
-
 func middlewareCors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -65,14 +40,6 @@ func middlewareCors(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (cfg *apiConfig) midlewareMetricsInc(next http.Handler) http.Handler {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cfg.fileserverHits++
 		next.ServeHTTP(w, r)
 	})
 }
