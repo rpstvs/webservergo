@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func validateChirp(w http.ResponseWriter, r *http.Request) {
@@ -55,4 +56,22 @@ func respondwithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 	w.WriteHeader(code)
 	w.Write(dat)
+}
+
+func badWordReplacement(s string) string {
+
+	replacement := "****"
+	badWordlist := [3]string{"kerfuffle", "sharbert", "fornax"}
+	s1 := strings.ToLower(s)
+	s2 := strings.Split(s1, " ")
+
+	for i,word := range s2 {
+		for _,badWord := badWordlist{
+			if word == badWord {
+				s2[i] = replacement
+			}
+		}
+
+	}
+
 }
