@@ -14,7 +14,7 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type returnVals struct {
-		Valid bool `json:"valid"`
+		CleanedBody string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -32,7 +32,7 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 	if len(params.Body) > maxChirpLength {
 		respondwithError(w, 400, "Chirp is too long")
 	}
-	respondwithJSON(w, http.StatusOK, returnVals{Valid: true})
+	respondwithJSON(w, http.StatusOK, returnVals{badWordReplacement(params.Body)})
 
 }
 
@@ -65,13 +65,16 @@ func badWordReplacement(s string) string {
 	s1 := strings.ToLower(s)
 	s2 := strings.Split(s1, " ")
 
-	for i,word := range s2 {
-		for _,badWord := badWordlist{
+	for i, word := range s2 {
+		for _, badWord := range badWordlist {
 			if word == badWord {
-				s2[i] = replacement
+				s1[i] = replacement
 			}
 		}
 
 	}
+	str3 := strings.Join(s2, " ")
+
+	return str3
 
 }
