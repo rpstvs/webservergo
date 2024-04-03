@@ -32,7 +32,15 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 	if len(params.Body) > maxChirpLength {
 		respondwithError(w, 400, "Chirp is too long")
 	}
-	respondwithJSON(w, http.StatusOK, returnVals{badWordReplacement(params.Body)})
+
+	badWords := map[string]struct{}{
+		"kerfuffle": {},
+		"sharbert":  {},
+		"fornax":    {},
+	}
+
+	cleanMsg := badWordReplacement(params.Body, badWords)
+	respondwithJSON(w, http.StatusOK, returnVals{CleanedBody: cleanMsg})
 
 }
 
@@ -58,18 +66,15 @@ func respondwithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(dat)
 }
 
-func badWordReplacement(s string) string {
+func badWordReplacement(s string, badWords map[string]struct{}) string {
 
 	replacement := "****"
-	badWordlist := [3]string{"kerfuffle", "sharbert", "fornax"}
-	s1 := strings.ToLower(s)
-	s2 := strings.Split(s1, " ")
-
+	s2 := strings.Split(s, " ")
 	for i, word := range s2 {
-		for _, badWord := range badWordlist {
-			if word == badWord {
-				s1[i] = replacement
-			}
+
+		_, ok := badWords[strings.ToLower(word)]
+		if ok {
+			s2[i] = replacement
 		}
 
 	}
