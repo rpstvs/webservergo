@@ -19,7 +19,8 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", healthHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
 	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
-	mux.HandleFunc("POST /api/validate_chirp", validateChirp)
+	mux.HandleFunc("POST /api/chirps", createChirp)
+	//mux.HandleFunc("GET /api/chirps", retrieveChirps)
 
 	corsMux := middlewareCors(mux)
 
@@ -43,3 +44,6 @@ func middlewareCors(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// POST entra o chipr -> é validado -> adicionar um id e escrever para a db
+// GET -> existe? - > escrever os chirps que estão na base de dados.

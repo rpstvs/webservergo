@@ -7,7 +7,9 @@ import (
 	"strings"
 )
 
-func validateChirp(w http.ResponseWriter, r *http.Request) {
+var id int
+
+func createChirp(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
 		Body string `json:"body"`
@@ -15,6 +17,7 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 
 	type returnVals struct {
 		CleanedBody string `json:"cleaned_body"`
+		Id          int    `json:"id"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -40,7 +43,8 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cleanMsg := badWordReplacement(params.Body, badWords)
-	respondwithJSON(w, http.StatusOK, returnVals{CleanedBody: cleanMsg})
+	id++
+	respondwithJSON(w, 201, returnVals{CleanedBody: cleanMsg, Id: id})
 
 }
 
@@ -62,6 +66,7 @@ func respondwithJSON(w http.ResponseWriter, code int, payload interface{}) {
 		w.WriteHeader(500)
 		return
 	}
+
 	w.WriteHeader(code)
 	w.Write(dat)
 }
