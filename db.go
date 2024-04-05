@@ -15,11 +15,6 @@ type DBStructure struct {
 	Chirps map[int]Chirp `json:"chirps"`
 }
 
-type Chirp struct {
-	Id   int    `json:id`
-	Body string `json: body`
-}
-
 func NewDB(path string) (*DB, error) {
 	if path == "" {
 		return nil, errors.New("path can't be null")
