@@ -21,13 +21,13 @@ type Chirp struct {
 	Body string `json:"body"`
 }
 
-func (db *DB) NewDB(path string) (*DB, error) {
-	dbt := &DB{
+func NewDB(path string) (*DB, error) {
+	db := &DB{
 		path: path,
 		mux:  &sync.RWMutex{},
 	}
-	err := dbt.ensureDB()
-	return dbt, err
+	err := db.ensureDB()
+	return db, err
 }
 
 func (db *DB) CreateChirp(body string) (Chirp, error) {
@@ -37,8 +37,8 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 	}
 	id := len(dbStructure.Chirps) + 1
 	chirp := Chirp{
-		ID:   id,
 		Body: body,
+		ID:   id,
 	}
 	dbStructure.Chirps[id] = chirp
 	err = db.writeDB(dbStructure)
