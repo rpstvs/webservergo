@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"errors"
@@ -13,6 +13,11 @@ type DB struct {
 
 type DBStructure struct {
 	Chirps map[int]Chirp `json:"chirps"`
+}
+
+type Chirp struct {
+	ID   int    `json:"id"`
+	Body string `json:"body"`
 }
 
 func NewDB(path string) (*DB, error) {
