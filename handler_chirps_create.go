@@ -17,11 +17,6 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 		Body string `json:"body"`
 	}
 
-	type returnVals struct {
-		CleanedBody string `json:"cleaned_body"`
-		Id          int    `json:"id"`
-	}
-
 	decoder := json.NewDecoder(r.Body)
 
 	params := parameters{}

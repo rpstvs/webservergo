@@ -1,17 +1,29 @@
 package main
 
 import (
+	"log"
 	"net/http"
+
+	"github.com/rpstvs/webservergo/internals/database"
 )
 
 type apiConfig struct {
 	fileserverHits int
+	DB             *database.DB
 }
 
 func main() {
 	const port = "8080"
 	const filepathRoot = "."
-	var apiCfg apiConfig
+	db, err := database.NewDB("database.json")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	apiCfg := apiConfig{
+		fileserverHits: 0,
+		DB:             db,
+	}
 	mux := http.NewServeMux()
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
@@ -19,8 +31,8 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", healthHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
 	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
-	mux.HandleFunc("POST /api/chirps", createChirp)
-	//mux.HandleFunc("GET /api/chirps", retrieveChirps)
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
+	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
 
 	corsMux := middlewareCors(mux)
 
