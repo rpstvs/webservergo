@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 )
 
 func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
@@ -24,4 +26,39 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 	})
 	respondwithJSON(w, http.StatusOK, chirps)
 
+}
+
+func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
+
+	dbChirps, err := cfg.DB.GetChirps()
+
+	if err != nil {
+		respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps")
+		return
+	}
+
+	idString := r.PathValue("GET localhost:8080/api/chirps/1")
+	fmt.Println(idString)
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve with that id")
+		return
+	}
+
+	chirp := Chirp{}
+
+	for _, dbChirp := range dbChirps {
+
+		if dbChirp.ID == id {
+			chirp = Chirp{
+				ID:   dbChirp.ID,
+				Body: dbChirp.Body,
+			}
+
+		}
+
+	}
+
+	respondwithJSON(w, http.StatusOK, chirp)
 }

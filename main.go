@@ -27,12 +27,13 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
-	//mux.Handle("GET /admin/metrics", http.FileServer(http.Dir(".")))
+
 	mux.HandleFunc("GET /api/healthz", healthHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
 	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
+	mux.HandleFunc("GET /api/chirps/{chirpsid}", apiCfg.retrieveChirpsId)
 
 	corsMux := middlewareCors(mux)
 
@@ -56,6 +57,3 @@ func middlewareCors(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-// POST entra o chipr -> é validado -> adicionar um id e escrever para a db
-// GET -> existe? - > escrever os chirps que estão na base de dados.
