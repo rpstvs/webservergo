@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -37,8 +36,7 @@ func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idString := r.PathValue("GET localhost:8080/api/chirps/1")
-	fmt.Println(idString)
+	idString := r.PathValue("chirpsid")
 	id, err := strconv.Atoi(idString)
 
 	if err != nil {
@@ -47,6 +45,10 @@ func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chirp := Chirp{}
+
+	if len(dbChirps) < id {
+		w.WriteHeader(http.StatusNotFound)
+	}
 
 	for _, dbChirp := range dbChirps {
 
