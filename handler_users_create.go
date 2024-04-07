@@ -6,14 +6,16 @@ import (
 )
 
 type users struct {
-	Email string `json:"email"`
-	ID    int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	ID       int    `json:"id"`
 }
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
