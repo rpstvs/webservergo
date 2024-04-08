@@ -9,8 +9,9 @@ import (
 )
 
 type userLogin struct {
-	Password string `json:"-,noempty"`
+	Password string `json:"-,omitempty"`
 	Email    string `json:"email"`
+	ID       int    `json:"id"`
 }
 
 func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +34,7 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		respondwithError(w, http.StatusInternalServerError, "couldnt create user")
 		return
 	}
-	passwordDb, err := cfg.lookupEmail(params.Email)
+	passwordDb, id, err := cfg.lookupEmail(params.Email)
 
 	if err != nil {
 		respondwithError(w, http.StatusNotFound, "user not found")
@@ -44,23 +45,26 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if ok == nil {
 		respondwithJSON(w, http.StatusOK, userLogin{
 			Email: params.Email,
+			ID:    id,
 		})
+	} else {
+		respondwithError(w, http.StatusUnauthorized, "not authorized")
 	}
 
-	//respondwithError(w, http.StatusUnauthorized, "not authorized")
+	//
 }
 
-func (cfg *apiConfig) lookupEmail(email string) (string, error) {
+func (cfg *apiConfig) lookupEmail(email string) (string, int, error) {
 	dbUsers, err := cfg.DB.GetUsers()
 
 	if err != nil {
-		return "", errors.New("cenas")
+		return "", 0, errors.New("cenas")
 	}
 
 	for _, dbUser := range dbUsers {
 		if dbUser.Email == email {
-			return dbUser.Password, nil
+			return dbUser.Password, dbUser.ID, nil
 		}
 	}
-	return "", errors.New("email not found")
+	return "", 0, errors.New("email not found")
 }
