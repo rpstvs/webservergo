@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type users struct {
 	Email    string `json:"email"`
-	Password string `json:"password"`
+	Password string `json:"-,omitempty"`
 	ID       int    `json:"id"`
 }
 
@@ -28,7 +31,9 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.DB.CreateUser(params.Email)
+	passHashed, _ := passHash(params.Password)
+
+	user, err := cfg.DB.CreateUser(params.Email, passHashed)
 
 	if err != nil {
 		respondwithError(w, http.StatusInternalServerError, "couldn't create chirp")
@@ -40,4 +45,15 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		ID:    user.ID,
 	})
 
+}
+
+func passHash(password string) (string, error) {
+
+	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return "", errors.New("couldnt hash the password")
+	}
+
+	return string(passHash), nil
 }
