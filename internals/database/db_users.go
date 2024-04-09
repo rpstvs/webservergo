@@ -1,5 +1,9 @@
 package database
 
+import (
+	"errors"
+)
+
 type User struct {
 	ID       int    `json:"id"`
 	Email    string `json:"email"`
@@ -7,6 +11,7 @@ type User struct {
 }
 
 func (db *DB) CreateUser(email, password string) (User, error) {
+
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return User{}, err
@@ -52,5 +57,22 @@ func (db *DB) GetuserByEmail(email string) (User, error) {
 		}
 	}
 
-	return User{}, err
+	return User{}, errors.New("resource does not exist")
+}
+
+func (db *DB) GetUserId(id int) (User, error) {
+	dbStructure, err := db.loadDB()
+
+	if err != nil {
+		return User{}, err
+
+	}
+
+	user, ok := dbStructure.Users[id]
+
+	if !ok {
+		return User{}, errors.New("resource does not exist")
+	}
+
+	return user, nil
 }
