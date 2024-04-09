@@ -2,16 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/rpstvs/webservergo/internals/auth"
 )
 
-type users struct {
-	Email    string `json:"email"`
-	Password string `json:"-,omitempty"`
+type User struct {
 	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
 }
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +30,7 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	passHashed, _ := passHash(params.Password)
+	passHashed, _ := auth.PassHash(params.Password)
 
 	user, err := cfg.DB.CreateUser(params.Email, passHashed)
 
@@ -40,20 +39,9 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondwithJSON(w, http.StatusCreated, users{
+	respondwithJSON(w, http.StatusCreated, User{
 		Email: user.Email,
 		ID:    user.ID,
 	})
 
-}
-
-func passHash(password string) (string, error) {
-
-	passHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-	if err != nil {
-		return "", errors.New("couldnt hash the password")
-	}
-
-	return string(passHash), nil
 }

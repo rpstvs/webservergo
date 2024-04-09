@@ -5,24 +5,17 @@ import (
 	"errors"
 	"net/http"
 
-	"golang.org/x/crypto/bcrypt"
+	"github.com/rpstvs/webservergo/internals/auth"
 )
 
-type userLogin struct {
-	Password string `json:"-,omitempty"`
-	Email    string `json:"email"`
-	ID       int    `json:"id"`
-}
-
 func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
-	/*
-	 receive a request, procurar um user por email
-	 comparar passwords,
-	 dar autorizaçao ou nao
-	*/
 	type parameters struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
+	}
+
+	type response struct {
+		User
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -40,18 +33,16 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		respondwithError(w, http.StatusNotFound, "user not found")
 	}
 
-	ok := bcrypt.CompareHashAndPassword([]byte(passwordDb), []byte(params.Password))
+	ok := auth.CheckPasswordHash(params.Password, passwordDb)
 
 	if ok == nil {
-		respondwithJSON(w, http.StatusOK, userLogin{
+		respondwithJSON(w, http.StatusOK, response{User: User{
 			Email: params.Email,
 			ID:    id,
-		})
+		}})
 	} else {
 		respondwithError(w, http.StatusUnauthorized, "not authorized")
 	}
-
-	//
 }
 
 func (cfg *apiConfig) lookupEmail(email string) (string, int, error) {
