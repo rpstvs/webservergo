@@ -3,13 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/rpstvs/webservergo/internals/database"
 )
 
 type apiConfig struct {
 	fileserverHits int
 	DB             *database.DB
+	secret         string
 }
 
 func main() {
@@ -20,9 +23,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	godotenv.Load()
+	jwtSecret := os.Getenv("JWT_SECRET")
 	apiCfg := apiConfig{
 		fileserverHits: 0,
 		DB:             db,
+		secret:         jwtSecret,
 	}
 	mux := http.NewServeMux()
 
@@ -36,6 +43,7 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpsid}", apiCfg.retrieveChirpsId)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("POST /api/login", apiCfg.loginHandler)
+	mux.HandleFunc("PUT /api/login")
 
 	corsMux := middlewareCors(mux)
 
