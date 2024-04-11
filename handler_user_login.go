@@ -41,8 +41,16 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userToken, _ := cfg.createToken(User{
+		userLogging.ID,
+		params.Email,
+		params.Password,
+		"",
+	})
+
 	respondwithJSON(w, http.StatusOK, response{User: User{
 		Email: params.Email,
 		ID:    userLogging.ID,
+		Token: userToken,
 	}})
 }
