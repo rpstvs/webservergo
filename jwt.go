@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,4 +24,22 @@ func (cfg *apiConfig) createToken(user User) (string, error) {
 
 	return tokenstring, nil
 
+}
+
+func (cfg *apiConfig) validateToken(tokenstring string) error {
+
+	token, err := jwt.Parse(tokenstring, func(t *jwt.Token) (interface{}, error) {
+
+		return cfg.secret, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if !token.Valid {
+		return errors.New("invalid token")
+	}
+
+	return nil
 }
