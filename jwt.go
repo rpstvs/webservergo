@@ -26,7 +26,7 @@ func (cfg *apiConfig) createToken(user User) (string, error) {
 
 }
 
-func (cfg *apiConfig) validateToken(tokenstring string) error {
+func (cfg *apiConfig) ValidateToken(tokenstring string) error {
 
 	token, err := jwt.Parse(tokenstring, func(t *jwt.Token) (interface{}, error) {
 
