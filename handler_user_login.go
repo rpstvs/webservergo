@@ -54,22 +54,3 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		Token: userToken,
 	}})
 }
-
-func (cfg *apiConfig) protectedHandler(w http.ResponseWriter, r *http.Request) {
-	tokenString := r.Header.Get("Authorization")
-
-	if tokenString == "" {
-		respondwithError(w, http.StatusUnauthorized, "Missing authorization")
-		return
-	}
-
-	tokenString = tokenString[len("Bearer "):]
-
-	err := cfg.ValidateToken(tokenString)
-
-	if err != nil {
-		respondwithError(w, http.StatusUnauthorized, "Invalid Token")
-		return
-	}
-
-}
