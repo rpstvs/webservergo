@@ -76,3 +76,15 @@ func (db *DB) GetUserId(id int) (User, error) {
 
 	return user, nil
 }
+
+func (db *DB) UpdateUser(id int, email string) error {
+	user, err := db.GetUserId(id)
+
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	user.Email = email
+
+	return nil
+}
