@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/rpstvs/webservergo/internals/auth"
 )
 
 func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -38,17 +40,18 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		respondwithError(w, http.StatusUnauthorized, "este burro nao entra")
 		return
 	}
-
+	passHashed, _ := auth.PassHash(params.Password)
 	realId, _ := strconv.Atoi(id)
 
-	updated := cfg.DB.UpdateUser(realId, params.Email)
+	updated, err := cfg.DB.UpdateUser(realId, params.Email, passHashed)
 
-	if updated != nil {
+	if err != nil {
 		respondwithError(w, http.StatusInternalServerError, "nao deu")
 		return
 	}
 
-	respondwithJSON(w, http.StatusAccepted, User{
+	respondwithJSON(w, http.StatusOK, User{
 		Email: params.Email,
+		ID:    updated.ID,
 	})
 }

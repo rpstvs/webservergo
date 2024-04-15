@@ -77,14 +77,24 @@ func (db *DB) GetUserId(id int) (User, error) {
 	return user, nil
 }
 
-func (db *DB) UpdateUser(id int, email string) error {
-	user, err := db.GetUserId(id)
+func (db *DB) UpdateUser(id int, email, password string) (User, error) {
+	dbStructure, err := db.loadDB()
+
+	user := dbStructure.Users[id]
 
 	if err != nil {
-		return errors.New("user not found")
+		return User{}, err
 	}
 
 	user.Email = email
+	user.Password = password
+	dbStructure.Users[id] = user
 
-	return nil
+	err = db.writeDB(dbStructure)
+
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
 }

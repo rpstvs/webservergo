@@ -8,22 +8,19 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (cfg *apiConfig) createToken(user User) (string, error) {
+func (cfg *apiConfig) createToken(id int, ExpiresIn time.Duration) (string, error) {
+
+	signinKey := []byte(cfg.secret)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "chirpy",
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(200 * time.Second)),
-		Subject:   string(user.ID),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(ExpiresIn)),
+		Subject:   fmt.Sprintf("%d", id),
 	})
+	fmt.Println("vou criar um token")
 
-	tokenstring, err := token.SignedString([]byte(cfg.secret))
-
-	if err != nil {
-		return "", errors.New("token invalid")
-	}
-
-	return tokenstring, nil
+	return token.SignedString(signinKey)
 
 }
 

@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/rpstvs/webservergo/internals/auth"
 )
@@ -16,6 +18,7 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	type response struct {
 		User
+		Token string `json:"token"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -41,14 +44,23 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userToken, _ := cfg.createToken(User{
-		userLogging.ID,
-		params.Email,
-		params.Password,
-		"",
+	defaultExpiration := 60 * 60 * 24
+	if params.ExpiresInSeconds == 0 {
+		params.ExpiresInSeconds = defaultExpiration
+	} else if params.ExpiresInSeconds > defaultExpiration {
+		params.ExpiresInSeconds = defaultExpiration
+	}
+
+	userToken, _ := cfg.createToken(userLogging.ID, time.Duration(params.ExpiresInSeconds)*time.Second)
+
+	fmt.Println(userToken)
+
+	respondwithJSON(w, http.StatusOK, response{
+		User: User{
+			ID:    userLogging.ID,
+			Email: userLogging.Email,
+		},
+		Token: userToken,
 	})
 
-	respondwithJSON(w, http.StatusOK, response{User: User{
-		Token: userToken,
-	}})
 }
