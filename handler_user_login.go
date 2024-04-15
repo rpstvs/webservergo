@@ -49,8 +49,6 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	respondwithJSON(w, http.StatusOK, response{User: User{
-		Email: params.Email,
-		ID:    userLogging.ID,
 		Token: userToken,
 	}})
 }

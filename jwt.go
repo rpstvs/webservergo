@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,30 +17,33 @@ func (cfg *apiConfig) createToken(user User) (string, error) {
 		Subject:   string(user.ID),
 	})
 
-	tokenstring, err := token.SignedString(cfg.secret)
+	tokenstring, err := token.SignedString([]byte(cfg.secret))
 
 	if err != nil {
-		return "", nil
+		return "", errors.New("token invalid")
 	}
 
 	return tokenstring, nil
 
 }
 
-func (cfg *apiConfig) ValidateToken(tokenstring string) error {
+func (cfg *apiConfig) ValidateToken(tokenstring string) (string, error) {
 
-	token, err := jwt.Parse(tokenstring, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
 
-		return cfg.secret, nil
+		return []byte(cfg.secret), nil
 	})
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !token.Valid {
-		return errors.New("invalid token")
+		return "", errors.New("invalid token")
 	}
 
-	return nil
+	id, _ := token.Claims.GetSubject()
+	fmt.Println("acesso valido")
+
+	return id, nil
 }
