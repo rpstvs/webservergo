@@ -24,6 +24,22 @@ func (cfg *apiConfig) createToken(id int, ExpiresIn time.Duration) (string, erro
 
 }
 
+func (cfg *apiConfig) createRefreshToken(id int) (string, error) {
+
+	signinKey := []byte(cfg.secret)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Issuer:    "chirpy-refresh",
+		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(60 * 24 * time.Hour)),
+		Subject:   fmt.Sprintf("%d", id),
+	})
+	fmt.Println("vou criar um token")
+
+	return token.SignedString(signinKey)
+
+}
+
 func (cfg *apiConfig) ValidateToken(tokenstring string) (string, error) {
 
 	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {

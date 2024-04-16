@@ -18,7 +18,8 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	type response struct {
 		User
-		Token string `json:"token"`
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -52,6 +53,7 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userToken, _ := cfg.createToken(userLogging.ID, time.Duration(params.ExpiresInSeconds)*time.Second)
+	refreshToken, _ := cfg.createRefreshToken(userLogging.ID)
 
 	fmt.Println(userToken)
 
@@ -60,7 +62,8 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 			ID:    userLogging.ID,
 			Email: userLogging.Email,
 		},
-		Token: userToken,
+		Token:        userToken,
+		RefreshToken: refreshToken,
 	})
 
 }
