@@ -40,6 +40,12 @@ func (cfg *apiConfig) ValidateToken(tokenstring string) (string, error) {
 	}
 
 	id, _ := token.Claims.GetSubject()
+	issuer, _ := token.Claims.GetIssuer()
+
+	if issuer == "refresh" {
+		return "", errors.New("no access")
+	}
+
 	fmt.Println("acesso valido")
 
 	return id, nil
