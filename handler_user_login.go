@@ -4,16 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/rpstvs/webservergo/internals/auth"
 )
 
 func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email            string `json:"email"`
-		Password         string `json:"password"`
-		ExpiresInSeconds int    `json:"expires_in_seconds"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	type response struct {
@@ -45,14 +43,7 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defaultExpiration := 60 * 60 * 24
-	if params.ExpiresInSeconds == 0 {
-		params.ExpiresInSeconds = defaultExpiration
-	} else if params.ExpiresInSeconds > defaultExpiration {
-		params.ExpiresInSeconds = defaultExpiration
-	}
-
-	userToken, _ := cfg.createToken(userLogging.ID, time.Duration(params.ExpiresInSeconds)*time.Second)
+	userToken, _ := cfg.createToken(userLogging.ID)
 	refreshToken, _ := cfg.createRefreshToken(userLogging.ID)
 
 	fmt.Println(userToken)

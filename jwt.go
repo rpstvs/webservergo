@@ -8,14 +8,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (cfg *apiConfig) createToken(id int, ExpiresIn time.Duration) (string, error) {
+func (cfg *apiConfig) createToken(id int) (string, error) {
 
 	signinKey := []byte(cfg.secret)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "chirpy",
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(ExpiresIn)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(1 * time.Hour)),
 		Subject:   fmt.Sprintf("%d", id),
 	})
 	fmt.Println("vou criar um token")
@@ -58,7 +58,7 @@ func (cfg *apiConfig) ValidateToken(tokenstring string) (string, error) {
 	id, _ := token.Claims.GetSubject()
 	issuer, _ := token.Claims.GetIssuer()
 
-	if issuer == "refresh" {
+	if issuer == "chirpy-refresh" {
 		return "", errors.New("no access")
 	}
 
