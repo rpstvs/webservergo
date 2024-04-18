@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"errors"
@@ -8,9 +8,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (cfg *apiConfig) createToken(id int) (string, error) {
+func CreateToken(id int, tokenSecret string) (string, error) {
 
-	signinKey := []byte(cfg.secret)
+	signinKey := []byte(tokenSecret)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "chirpy",
@@ -24,9 +24,9 @@ func (cfg *apiConfig) createToken(id int) (string, error) {
 
 }
 
-func (cfg *apiConfig) createRefreshToken(id int) (string, error) {
+func CreateRefreshToken(id int, tokenSecret string) (string, error) {
 
-	signinKey := []byte(cfg.secret)
+	signinKey := []byte(tokenSecret)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "chirpy-refresh",
@@ -40,11 +40,11 @@ func (cfg *apiConfig) createRefreshToken(id int) (string, error) {
 
 }
 
-func (cfg *apiConfig) ValidateToken(tokenstring string) (string, error) {
+func ValidateToken(tokenstring, tokenSecret string) (string, error) {
 
 	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
 
-		return []byte(cfg.secret), nil
+		return []byte(tokenSecret), nil
 	})
 
 	if err != nil {

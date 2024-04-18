@@ -15,6 +15,7 @@ type DB struct {
 type DBStructure struct {
 	Chirps map[int]Chirp `json:"chirps"`
 	Users  map[int]User  `json:"users"`
+	Tokens map[int]Token `json:"tokens"`
 }
 
 func NewDB(path string) (*DB, error) {

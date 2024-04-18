@@ -43,8 +43,8 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userToken, _ := cfg.createToken(userLogging.ID)
-	refreshToken, _ := cfg.createRefreshToken(userLogging.ID)
+	userToken, _ := auth.CreateToken(userLogging.ID, cfg.secret)
+	refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.secret)
 
 	fmt.Println(userToken)
 

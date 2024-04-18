@@ -34,7 +34,7 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	tokenString = tokenString[len("Bearer "):]
 
-	id, err := cfg.ValidateToken(tokenString)
+	id, err := auth.ValidateToken(tokenString, cfg.secret)
 
 	if err != nil {
 		respondwithError(w, http.StatusUnauthorized, "este burro nao entra")
