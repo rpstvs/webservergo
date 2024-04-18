@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/rpstvs/webservergo/internals/auth"
@@ -46,7 +45,7 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	userToken, _ := auth.CreateToken(userLogging.ID, cfg.secret)
 	refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.secret)
 
-	fmt.Println(userToken)
+	cfg.DB.CreateTokenDB(refreshToken)
 
 	respondwithJSON(w, http.StatusOK, response{
 		User: User{

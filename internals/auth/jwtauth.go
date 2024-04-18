@@ -66,3 +66,22 @@ func ValidateToken(tokenstring, tokenSecret string) (string, error) {
 
 	return id, nil
 }
+
+func GetIssuer(tokenstring, tokenSecret string) (string, error) {
+	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
+
+		return []byte(tokenSecret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if !token.Valid {
+		return "", errors.New("invalid token")
+	}
+
+	issuer, _ := token.Claims.GetIssuer()
+
+	return issuer, nil
+}
