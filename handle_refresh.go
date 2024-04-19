@@ -37,11 +37,11 @@ func (cfg *apiConfig) refresh(w http.ResponseWriter, r *http.Request) {
 
 func (cfg *apiConfig) revoke(w http.ResponseWriter, r *http.Request) {
 
-	//tokenString := r.Header.Get("Authorization")
+	tokenString := r.Header.Get("Authorization")
 
-	//token := CheckRefreshToken(tokenString)
+	token := CheckRefreshToken(tokenString)
 
-	//issuer, _ := auth.GetIssuer(token, cfg.secret)
+	cfg.DB.RevokeToken(token)
 
 }
 
