@@ -34,7 +34,7 @@ func CreateRefreshToken(id int, tokenSecret string) (string, error) {
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(60 * 24 * time.Hour)),
 		Subject:   fmt.Sprintf("%d", id),
 	})
-	fmt.Println("vou criar um token")
+	fmt.Println(token.Claims.GetIssuer())
 
 	return token.SignedString(signinKey)
 
@@ -56,29 +56,24 @@ func ValidateToken(tokenstring, tokenSecret string) (string, error) {
 	}
 
 	id, _ := token.Claims.GetSubject()
-	issuer, _ := token.Claims.GetIssuer()
-
-	if issuer == "chirpy-refresh" {
-		return "", errors.New("no access")
-	}
 
 	fmt.Println("acesso valido")
 
 	return id, nil
 }
 
-func GetIssuer(tokenstring, tokenSecret string) (string, error) {
+func GetIssuerr(tokenstring, tokenSecret string) (string, error) {
 	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
 
 		return []byte(tokenSecret), nil
 	})
 
 	if err != nil {
-		return "", err
+		return "vazio1", err
 	}
 
 	if !token.Valid {
-		return "", errors.New("invalid token")
+		return "vazio2", errors.New("invalid token")
 	}
 
 	issuer, _ := token.Claims.GetIssuer()

@@ -39,6 +39,7 @@ func (db *DB) createDB() error {
 	dbStructure := DBStructure{
 		Chirps: map[int]Chirp{},
 		Users:  map[int]User{},
+		Tokens: map[int]Token{},
 	}
 	return db.writeDB(dbStructure)
 }
