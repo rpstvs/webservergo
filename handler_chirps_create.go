@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
+
+	"github.com/rpstvs/webservergo/internals/auth"
 )
 
 type Chirp struct {
-	Body string `json:"body"`
-	ID   int    `json:"id"`
+	Body      string `json:"body"`
+	ID        int    `json:"id"`
+	Author_id int    `json:"author_id"`
 }
 
 func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
@@ -28,13 +32,31 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	tokenString := r.Header.Get("Authorization")
+
+	if tokenString == "" {
+		respondwithError(w, http.StatusUnauthorized, "Missing authorization")
+		return
+	}
+
+	tokenString = tokenString[len("Bearer "):]
+
+	id, err := auth.ValidateToken(tokenString, cfg.secret)
+
+	if err != nil {
+		respondwithError(w, http.StatusUnauthorized, "este burro nao entra")
+		return
+	}
+
+	realId, _ := strconv.Atoi(id)
+
 	cleaned, err := validateChirp(params.Body)
 	if err != nil {
 		respondwithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	chirp, err := cfg.DB.CreateChirp(cleaned)
+	chirp, err := cfg.DB.CreateChirp(cleaned, realId)
 	if err != nil {
 		respondwithError(w, http.StatusInternalServerError, "couldn't create chirp")
 		return
