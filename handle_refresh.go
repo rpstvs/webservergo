@@ -19,9 +19,11 @@ func (cfg *apiConfig) refresh(w http.ResponseWriter, r *http.Request) {
 
 	issuer, _ := auth.GetIssuerr(refToken, cfg.secret)
 
+	tokenDb, _ := cfg.DB.GetToken(refToken)
+
 	fmt.Println(issuer)
 
-	if issuer == "chirpy-refresh" {
+	if issuer == "chirpy-refresh" && !tokenDb.Revoke {
 		idString, _ := auth.ValidateToken(refToken, cfg.secret)
 		id, _ := strconv.Atoi(idString)
 		token, _ := auth.CreateToken(id, cfg.secret)
@@ -30,7 +32,7 @@ func (cfg *apiConfig) refresh(w http.ResponseWriter, r *http.Request) {
 			Token: token,
 		})
 	} else {
-		respondwithError(w, http.StatusBadRequest, "Not valid refresh token")
+		respondwithError(w, http.StatusUnauthorized, "Not valid refresh token")
 	}
 
 }

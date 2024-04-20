@@ -40,6 +40,13 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		respondwithError(w, http.StatusUnauthorized, "este burro nao entra")
 		return
 	}
+
+	issuer, _ := auth.GetIssuerr(tokenString, cfg.secret)
+
+	if issuer == "chirpy-refresh" {
+		respondwithError(w, http.StatusUnauthorized, "token invalido")
+	}
+
 	passHashed, _ := auth.PassHash(params.Password)
 	realId, _ := strconv.Atoi(id)
 
