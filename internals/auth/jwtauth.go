@@ -18,7 +18,6 @@ func CreateToken(id int, tokenSecret string) (string, error) {
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(1 * time.Hour)),
 		Subject:   fmt.Sprintf("%d", id),
 	})
-	fmt.Println("vou criar um token")
 
 	return token.SignedString(signinKey)
 
@@ -34,7 +33,6 @@ func CreateRefreshToken(id int, tokenSecret string) (string, error) {
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(60 * 24 * time.Hour)),
 		Subject:   fmt.Sprintf("%d", id),
 	})
-	fmt.Println(token.Claims.GetIssuer())
 
 	return token.SignedString(signinKey)
 

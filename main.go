@@ -35,17 +35,20 @@ func main() {
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 
-	mux.HandleFunc("GET /api/healthz", healthHandler)
-	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
-	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
 	mux.HandleFunc("GET /api/chirps/{chirpsid}", apiCfg.retrieveChirpsId)
+
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("POST /api/login", apiCfg.loginHandler)
 	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUser)
+
 	mux.HandleFunc("POST /api/refresh", apiCfg.refresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.revoke)
+
+	mux.HandleFunc("GET /api/healthz", healthHandler)
+	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
+	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
 
 	corsMux := middlewareCors(mux)
 

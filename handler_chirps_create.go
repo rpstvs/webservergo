@@ -63,9 +63,9 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 	}
 
 	respondwithJSON(w, http.StatusCreated, Chirp{
-
-		Body: chirp.Body,
-		ID:   chirp.ID,
+		Body:      chirp.Body,
+		ID:        chirp.ID,
+		Author_id: chirp.Author_id,
 	})
 
 }

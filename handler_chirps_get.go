@@ -54,8 +54,9 @@ func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
 
 		if dbChirp.ID == id {
 			chirp = Chirp{
-				ID:   dbChirp.ID,
-				Body: dbChirp.Body,
+				ID:        dbChirp.ID,
+				Body:      dbChirp.Body,
+				Author_id: dbChirp.Author_id,
 			}
 
 		}
