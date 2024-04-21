@@ -37,3 +37,19 @@ func (db *DB) CreateChirp(body string, author_id int) (Chirp, error) {
 	}
 	return chirp, nil
 }
+
+func (db *DB) GetChirpById(id int) (Chirp, error) {
+
+	dbStructure, err := db.loadDB()
+
+	if err != nil {
+		return Chirp{}, err
+	}
+
+	for _, chirp := range dbStructure.Chirps {
+		if chirp.ID == id {
+			return chirp, nil
+		}
+	}
+	return Chirp{}, err
+}

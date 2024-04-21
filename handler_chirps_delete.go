@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,10 +11,14 @@ import (
 func (cfg *apiConfig) DeleteChirp(w http.ResponseWriter, r *http.Request) {
 	dbChirps, _ := cfg.DB.GetChirps()
 
-	tokenString := w.Header().Get("Authorization")
+	tokenString := r.Header.Get("Authorization")
+
+	if tokenString == "" {
+		respondwithError(w, http.StatusUnauthorized, "Missing authorization")
+		return
+	}
 
 	tokenString = tokenString[len("Bearer "):]
-
 	id, _ := auth.ValidateToken(tokenString, cfg.secret)
 
 	author_id, _ := strconv.Atoi(id)
@@ -25,11 +30,12 @@ func (cfg *apiConfig) DeleteChirp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}
 
-	for _, dbChirp := range dbChirps {
+	chirp, _ := cfg.DB.GetChirpById(chirpId)
 
-		if dbChirp.Author_id == author_id {
-			delete(dbChirp, chirpId)
-		}
+	if chirp.Author_id == author_id {
+		fmt.Println("Podes eliminar")
+	} else {
+		respondwithError(w, http.StatusForbidden, "Forbidden")
 	}
 
 }

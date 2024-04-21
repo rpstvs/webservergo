@@ -55,8 +55,6 @@ func ValidateToken(tokenstring, tokenSecret string) (string, error) {
 
 	id, _ := token.Claims.GetSubject()
 
-	fmt.Println("acesso valido")
-
 	return id, nil
 }
 
