@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -33,7 +32,8 @@ func (cfg *apiConfig) DeleteChirp(w http.ResponseWriter, r *http.Request) {
 	chirp, _ := cfg.DB.GetChirpById(chirpId)
 
 	if chirp.Author_id == author_id {
-		fmt.Println("Podes eliminar")
+		cfg.DB.DeleteChirp(chirpId)
+		w.WriteHeader(http.StatusOK)
 	} else {
 		respondwithError(w, http.StatusForbidden, "Forbidden")
 	}
