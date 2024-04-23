@@ -5,9 +5,10 @@ import (
 )
 
 type User struct {
-	ID       int    `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	ID            int    `json:"id"`
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	Is_Chirpy_Red bool   `json:"is_chirpy_red"`
 }
 
 func (db *DB) CreateUser(email, password string) (User, error) {
@@ -18,9 +19,10 @@ func (db *DB) CreateUser(email, password string) (User, error) {
 	}
 	id := len(dbStructure.Users) + 1
 	user := User{
-		Email:    email,
-		ID:       id,
-		Password: password,
+		Email:         email,
+		ID:            id,
+		Password:      password,
+		Is_Chirpy_Red: false,
 	}
 	dbStructure.Users[id] = user
 	err = db.writeDB(dbStructure)
