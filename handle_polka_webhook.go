@@ -15,22 +15,38 @@ func (cfg *apiConfig) PolkaHandler(w http.ResponseWriter, r *http.Request) {
 		Event string       `json:"event"`
 	}
 
-	decoder := json.NewDecoder(r.Body)
+	apiString := r.Header.Get("Authorization")
 
-	params := Body{}
-
-	err := decoder.Decode(&params)
-
-	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "couldnt decode")
+	if apiString == "" {
+		respondwithError(w, http.StatusUnauthorized, "missing authorization")
+		return
 	}
-	if params.Event == "user.upgraded" {
-		err = cfg.DB.UpgradeUser(params.Data.UserID)
+
+	apiString = apiString[len("ApiKey "):]
+
+	if apiString == cfg.apiPolka {
+
+		decoder := json.NewDecoder(r.Body)
+
+		params := Body{}
+
+		err := decoder.Decode(&params)
 
 		if err != nil {
-			respondwithError(w, http.StatusNotFound, "user not found")
+			respondwithError(w, http.StatusInternalServerError, "couldnt decode")
+		}
+		if params.Event == "user.upgraded" {
+			err = cfg.DB.UpgradeUser(params.Data.UserID)
+
+			if err != nil {
+				respondwithError(w, http.StatusNotFound, "user not found")
+			}
+
+			w.WriteHeader(http.StatusOK)
 		}
 
-		w.WriteHeader(http.StatusOK)
+	} else {
+		respondwithError(w, http.StatusUnauthorized, "Not Authorized")
+		return
 	}
 }

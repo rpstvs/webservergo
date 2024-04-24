@@ -13,6 +13,7 @@ type apiConfig struct {
 	fileserverHits int
 	DB             *database.DB
 	secret         string
+	apiPolka       string
 }
 
 func main() {
@@ -26,10 +27,12 @@ func main() {
 
 	godotenv.Load()
 	jwtSecret := os.Getenv("JWT_SECRET")
+	apiPolka := os.Getenv("API_POLKA")
 	apiCfg := apiConfig{
 		fileserverHits: 0,
 		DB:             db,
 		secret:         jwtSecret,
+		apiPolka:       apiPolka,
 	}
 	mux := http.NewServeMux()
 
