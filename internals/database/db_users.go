@@ -100,3 +100,22 @@ func (db *DB) UpdateUser(id int, email, password string) (User, error) {
 
 	return user, nil
 }
+
+func (db *DB) UpgradeUser(id int) error {
+	dbStructure, err := db.loadDB()
+
+	if err != nil {
+		return err
+	}
+
+	user := dbStructure.Users[id]
+
+	user.Is_Chirpy_Red = true
+
+	dbStructure.Users[id] = user
+
+	db.writeDB(dbStructure)
+
+	return nil
+
+}

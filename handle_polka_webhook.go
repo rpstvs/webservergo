@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -25,5 +24,13 @@ func (cfg *apiConfig) PolkaHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondwithError(w, http.StatusInternalServerError, "couldnt decode")
 	}
-	fmt.Println(params.Event)
+	if params.Event == "user.upgraded" {
+		err = cfg.DB.UpgradeUser(params.Data.UserID)
+
+		if err != nil {
+			respondwithError(w, http.StatusNotFound, "user not found")
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
 }
