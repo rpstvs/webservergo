@@ -7,23 +7,38 @@ import (
 )
 
 func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
-	dbChirps, err := cfg.DB.GetChirps()
-	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps")
-		return
-	}
-	chirps := []Chirp{}
+	s := r.URL.Query().Get("author_id")
 
-	for _, dbChirp := range dbChirps {
-		chirps = append(chirps, Chirp{
-			ID:   dbChirp.ID,
-			Body: dbChirp.Body,
+	if s != "" {
+		idInt, _ := strconv.Atoi(s)
+
+		chirps, err := cfg.DB.GetChirpAuthor(idInt)
+
+		if err != nil {
+			return
+		}
+
+		respondwithJSON(w, http.StatusOK, chirps)
+	} else {
+
+		dbChirps, err := cfg.DB.GetChirps()
+		if err != nil {
+			respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps")
+			return
+		}
+		chirps := []Chirp{}
+
+		for _, dbChirp := range dbChirps {
+			chirps = append(chirps, Chirp{
+				ID:   dbChirp.ID,
+				Body: dbChirp.Body,
+			})
+		}
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].ID < chirps[j].ID
 		})
+		respondwithJSON(w, http.StatusOK, chirps)
 	}
-	sort.Slice(chirps, func(i, j int) bool {
-		return chirps[i].ID < chirps[j].ID
-	})
-	respondwithJSON(w, http.StatusOK, chirps)
 
 }
 
