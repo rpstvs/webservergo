@@ -7,7 +7,7 @@ This is an example of a Webserver in Go
 Made this small project in order to solidify knowledge in web dev. 
 This repository implements what it could be a clone of Twitter but renamed as chirps.
 
-#Features
+## Features
 
 I implemented authentication with JTW, using refresh tokens to refresh the access tokens. 
 Some of the endpoints are restricted to users that are logged in and have a valid token.
