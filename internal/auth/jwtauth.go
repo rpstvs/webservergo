@@ -8,6 +8,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	// TokenTypeAccess -
+	TokenTypeAccess TokenType = "chirpy-access"
+)
+
 func CreateToken(id int, tokenSecret string) (string, error) {
 
 	signinKey := []byte(tokenSecret)
