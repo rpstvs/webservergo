@@ -6,5 +6,6 @@ CREATE TABLE refresh_tokens(
     user_id UUID NOT NULL REFERENCES users(id),
     expires_at TIMESTAMP,
     revoked_at TIMESTAMP
-) -- goose Down
+);
+-- +goose Down
 DROP TABLE refresh_tokens

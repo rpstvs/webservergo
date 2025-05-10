@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rpstvs/webservergo/internals/auth"
+	"github.com/rpstvs/webservergo/internal/auth"
 )
 
 type Chirp struct {
