@@ -15,7 +15,7 @@ func (apic *apiConfig) counterHandler(w http.ResponseWriter, r *http.Request) {
 		<p>Chirpy has been visited %d times!</p>
 	</body>
 	
-	</html>`, apic.fileserverHits)
+	</html>`, apic.fileServerHits.Load())
 	w.Write([]byte(tmp))
 
 }
@@ -23,7 +23,7 @@ func (apic *apiConfig) counterHandler(w http.ResponseWriter, r *http.Request) {
 func (cfg *apiConfig) midlewareMetricsInc(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cfg.fileserverHits++
+		cfg.fileServerHits.Add(1)
 		next.ServeHTTP(w, r)
 	})
 }

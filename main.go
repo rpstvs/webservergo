@@ -1,39 +1,25 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"os"
+	"sync/atomic"
 
-	"github.com/joho/godotenv"
-	"github.com/rpstvs/webservergo/internals/database"
+	"github.com/rpstvs/webservergo/internal/database"
 )
 
 type apiConfig struct {
-	fileserverHits int
-	DB             *database.DB
-	secret         string
-	apiPolka       string
+	fileServerHits atomic.Int32
+	dbQueries      *database.Queries
+	Platform       string
+	tokenSecret    string
 }
 
 func main() {
 	const port = "8080"
 	const filepathRoot = "."
-	db, err := database.NewDB("database.json")
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	apiCfg := GetConfig()
 
-	godotenv.Load()
-	jwtSecret := os.Getenv("JWT_SECRET")
-	apiPolka := os.Getenv("API_POLKA")
-	apiCfg := apiConfig{
-		fileserverHits: 0,
-		DB:             db,
-		secret:         jwtSecret,
-		apiPolka:       apiPolka,
-	}
 	mux := http.NewServeMux()
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))

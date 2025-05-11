@@ -8,19 +8,21 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type TokenType string
+
 const (
 	// TokenTypeAccess -
 	TokenTypeAccess TokenType = "chirpy-access"
 )
 
-func CreateToken(id int, tokenSecret string) (string, error) {
+func CreateToken(id int, tokenSecret string, expiresIn time.Duration) (string, error) {
 
 	signinKey := []byte(tokenSecret)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		Issuer:    "chirpy",
+		Issuer:    string(TokenTypeAccess),
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(1 * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expiresIn)),
 		Subject:   fmt.Sprintf("%d", id),
 	})
 
