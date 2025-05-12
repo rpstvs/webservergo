@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type TokenType string
@@ -15,7 +16,7 @@ const (
 	TokenTypeAccess TokenType = "chirpy-access"
 )
 
-func CreateToken(id int, tokenSecret string, expiresIn time.Duration) (string, error) {
+func CreateToken(userid uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
 
 	signinKey := []byte(tokenSecret)
 
@@ -23,7 +24,7 @@ func CreateToken(id int, tokenSecret string, expiresIn time.Duration) (string, e
 		Issuer:    string(TokenTypeAccess),
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expiresIn)),
-		Subject:   fmt.Sprintf("%d", id),
+		Subject:   string(userid.String()),
 	})
 
 	return token.SignedString(signinKey)
@@ -45,22 +46,37 @@ func CreateRefreshToken(id int, tokenSecret string) (string, error) {
 
 }
 
-func ValidateToken(tokenstring, tokenSecret string) (string, error) {
+func ValidateToken(tokenstring, tokenSecret string) (uuid.UUID, error) {
 
-	token, err := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
+	claimsStruct := jwt.RegisteredClaims{}
 
-		return []byte(tokenSecret), nil
-	})
+	token, err := jwt.ParseWithClaims(tokenstring, &claimsStruct, func(t *jwt.Token) (interface{}, error) { return []byte(tokenSecret), nil })
 
 	if err != nil {
-		return "", err
+		return uuid.Nil, err
 	}
 
-	if !token.Valid {
-		return "", errors.New("invalid token")
+	userIDString, err := token.Claims.GetSubject()
+
+	if err != nil {
+		return uuid.Nil, err
 	}
 
-	id, _ := token.Claims.GetSubject()
+	issuer, err := token.Claims.GetIssuer()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if issuer != string(TokenTypeAccess) {
+		return uuid.Nil, errors.New("invalid issuer")
+	}
+
+	id, err := uuid.Parse(userIDString)
+
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid userid")
+	}
 
 	return id, nil
 }
