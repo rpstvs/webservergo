@@ -3,17 +3,23 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
-	"strconv"
 	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/rpstvs/webservergo/internal/auth"
+	"github.com/rpstvs/webservergo/internal/database"
 )
 
 type Chirp struct {
-	Body      string `json:"body"`
-	ID        int    `json:"id"`
-	Author_id int    `json:"author_id"`
+	Id         uuid.UUID `json:"id"`
+	Created_at time.Time `json:"created_at"`
+	Updated_at time.Time `json:"updated_at"`
+	Body       string    `json:"body"`
+	User_id    uuid.UUID `json:"user_id"`
 }
 
 func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
@@ -21,79 +27,94 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 		Body string `json:"body"`
 	}
 
+	type response struct {
+		Id         uuid.UUID `json:"id"`
+		Created_at time.Time `json:"created_at"`
+		Updated_at time.Time `json:"updated_at"`
+		Body       string    `json:"body"`
+		User_id    uuid.UUID `json:"user_id"`
+	}
+
+	token, err := auth.GetBearerToken(r.Header)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "No token", nil)
+		return
+	}
+	fmt.Println(token)
+	user, err := auth.ValidateJWT(token, api.tokenSecret)
+	fmt.Println(err)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "unauthorized", nil)
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 
-	params := parameters{}
+	var params parameters
 
-	err := decoder.Decode(&params)
-
-	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "couldn't decode parameters")
-		return
-	}
-
-	tokenString := r.Header.Get("Authorization")
-
-	if tokenString == "" {
-		respondwithError(w, http.StatusUnauthorized, "Missing authorization")
-		return
-	}
-
-	tokenString = tokenString[len("Bearer "):]
-
-	id, err := auth.ValidateToken(tokenString, cfg.secret)
+	err = decoder.Decode(&params)
 
 	if err != nil {
-		respondwithError(w, http.StatusUnauthorized, "este burro nao entra")
+		log.Println("Couldnt decode the info")
 		return
 	}
 
-	realId, _ := strconv.Atoi(id)
+	str, err := validateChirp(params.Body)
 
-	cleaned, err := validateChirp(params.Body)
 	if err != nil {
-		respondwithError(w, http.StatusBadRequest, err.Error())
+		log.Println("invalid chirp")
 		return
+
 	}
 
-	chirp, err := cfg.DB.CreateChirp(cleaned, realId)
-	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "couldn't create chirp")
-		return
-	}
-
-	respondwithJSON(w, http.StatusCreated, Chirp{
-		Body:      chirp.Body,
-		ID:        chirp.ID,
-		Author_id: chirp.Author_id,
+	chirp, err := api.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
+		Body:   str,
+		UserID: user,
 	})
 
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldnt create chirp", err)
+		return
+	}
+	respondWithJson(w, 201, response{
+		Id:         chirp.ID,
+		Created_at: chirp.CreatedAt,
+		Updated_at: chirp.UpdatedAt,
+		Body:       chirp.Body,
+		User_id:    chirp.UserID,
+	})
 }
 
 func validateChirp(body string) (string, error) {
-	const maxChirpLength = 140
-	if len(body) > maxChirpLength {
-		return "", errors.New("Chirp is too long")
+	const maxChirpLen = 140
+
+	if len(body) > maxChirpLen {
+		return "", errors.New("chirp too long")
 	}
+
 	badWords := map[string]struct{}{
-		"kerfuffle": {},
-		"sharbert":  {},
 		"fornax":    {},
+		"sharbert":  {},
+		"kerfuffle": {},
 	}
-	cleaned := getCleanedbody(body, badWords)
+
+	cleaned := cleanBody(body, badWords)
 	return cleaned, nil
 }
 
-func getCleanedbody(body string, badWords map[string]struct{}) string {
+func cleanBody(chirp string, badWords map[string]struct{}) string {
 	replacement := "****"
-	s2 := strings.Split(body, " ")
-	for i, word := range s2 {
+	words := strings.Split(chirp, " ")
+	for i, word := range words {
 		_, ok := badWords[strings.ToLower(word)]
+
 		if ok {
-			s2[i] = replacement
+			words[i] = replacement
 		}
 	}
-	str3 := strings.Join(s2, " ")
-	return str3
 
+	new_string := strings.Join(words, " ")
+
+	return new_string
 }

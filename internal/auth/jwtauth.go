@@ -3,6 +3,8 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -98,4 +100,20 @@ func GetIssuerr(tokenstring, tokenSecret string) (string, error) {
 	issuer, _ := token.Claims.GetIssuer()
 
 	return issuer, nil
+}
+
+func GetBearerToken(headers http.Header) (string, error) {
+	bearer := headers.Get("Authorization")
+
+	if bearer == "" {
+		return "", errors.New("no token")
+	}
+
+	parts := strings.Split(bearer, " ")
+
+	if len(parts) != 2 {
+		return "", errors.New("malformed auth token")
+	}
+
+	return parts[1], nil
 }
