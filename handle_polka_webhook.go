@@ -18,7 +18,7 @@ func (cfg *apiConfig) PolkaHandler(w http.ResponseWriter, r *http.Request) {
 	apiString := r.Header.Get("Authorization")
 
 	if apiString == "" {
-		respondwithError(w, http.StatusUnauthorized, "missing authorization")
+		respondWithError(w, http.StatusUnauthorized, "missing authorization")
 		return
 	}
 
@@ -33,7 +33,7 @@ func (cfg *apiConfig) PolkaHandler(w http.ResponseWriter, r *http.Request) {
 		err := decoder.Decode(&params)
 
 		if err != nil {
-			respondwithError(w, http.StatusInternalServerError, "couldnt decode")
+			respondWithError(w, http.StatusInternalServerError, "couldnt decode", nil)
 		}
 		if params.Event == "user.upgraded" {
 			err = cfg.DB.UpgradeUser(params.Data.UserID)

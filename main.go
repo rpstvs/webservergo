@@ -21,6 +21,7 @@ func main() {
 	apiCfg := GetConfig()
 
 	mux := http.NewServeMux()
+	corsMux := middlewareCors(mux)
 
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 
@@ -40,9 +41,6 @@ func main() {
 
 	mux.HandleFunc("GET /api/healthz", healthHandler)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.counterHandler)
-	mux.HandleFunc("GET /api/reset", apiCfg.resetCounterHits)
-
-	corsMux := middlewareCors(mux)
 
 	server := &http.Server{
 		Addr:    ":" + port,
@@ -50,17 +48,4 @@ func main() {
 	}
 	server.ListenAndServe()
 
-}
-
-func middlewareCors(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
 }

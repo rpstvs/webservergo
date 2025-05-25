@@ -3,16 +3,18 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/rpstvs/webservergo/internals/auth"
 )
 
 type User struct {
-	ID            int    `json:"id"`
-	Email         string `json:"email"`
-	Password      string `json:"-"`
-	Token         string `json:"token,omitempty"`
-	Is_Chirpy_Red bool   `json:"is_chirpy_red"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"`
 }
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {

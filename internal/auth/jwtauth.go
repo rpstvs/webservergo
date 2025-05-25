@@ -48,7 +48,7 @@ func CreateRefreshToken(id int, tokenSecret string) (string, error) {
 
 }
 
-func ValidateToken(tokenstring, tokenSecret string) (uuid.UUID, error) {
+func ValidateJWT(tokenstring, tokenSecret string) (uuid.UUID, error) {
 
 	claimsStruct := jwt.RegisteredClaims{}
 

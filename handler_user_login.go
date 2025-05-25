@@ -25,33 +25,30 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&params)
 
 	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "couldnt decode parameters")
+		respondWithError(w, http.StatusInternalServerError, "couldnt decode parameters", nil)
 		return
 	}
 
-	userLogging, err := cfg.DB.GetuserByEmail(params.Email)
+	userLogging, err := cfg.dbQueries.GetUserByEmail(r.Context(), params.Email)
 
 	if err != nil {
-		respondwithError(w, http.StatusNotFound, "user not found")
+		respondWithError(w, http.StatusNotFound, "user not found", nil)
 	}
 
-	err = auth.CheckPasswordHash(params.Password, userLogging.Password)
+	err = auth.CheckPasswordHash(params.Password, params.Password)
 
 	if err != nil {
-		respondwithError(w, http.StatusUnauthorized, "not authorized")
+		respondWithError(w, http.StatusUnauthorized, "not authorized", nil)
 		return
 	}
 
-	userToken, _ := auth.CreateToken(userLogging.ID, cfg.secret)
-	refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.secret)
+	userToken, _ := auth.CreateToken(userLogging.ID, cfg.tokenSecret)
+	refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.tokenSecret)
 
-	cfg.DB.CreateTokenDB(refreshToken)
-
-	respondwithJSON(w, http.StatusOK, response{
+	respondWithJson(w, http.StatusOK, response{
 		User: User{
-			ID:            userLogging.ID,
-			Email:         userLogging.Email,
-			Is_Chirpy_Red: userLogging.Is_Chirpy_Red,
+			ID:    userLogging.ID,
+			Email: userLogging.Email,
 		},
 		Token:        userToken,
 		RefreshToken: refreshToken,

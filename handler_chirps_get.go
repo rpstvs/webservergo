@@ -2,113 +2,71 @@ package main
 
 import (
 	"net/http"
-	"sort"
-	"strconv"
+	"time"
+
+	"github.com/google/uuid"
 )
 
-func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
-	s := r.URL.Query().Get("author_id")
-	se := r.URL.Query().Get("sort")
-
-	if se != "desc" {
-		se = "asc"
+func (cfg *apiConfig) RetrieveChirps(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		Id         uuid.UUID `json:"id"`
+		Created_at time.Time `json:"created_at"`
+		Updated_at time.Time `json:"updated_at"`
+		Body       string    `json:"body"`
+		User_id    uuid.UUID `json:"user_id"`
 	}
 
-	if s != "" {
-		idInt, _ := strconv.Atoi(s)
+	chirps, err := cfg.dbQueries.GetChirps(r.Context())
 
-		chirps, err := cfg.DB.GetChirpAuthor(idInt)
-
-		chirpz := []Chirp{}
-
-		for _, dbChirp := range chirps {
-			chirpz = append(chirpz, Chirp{
-				ID:   dbChirp.ID,
-				Body: dbChirp.Body,
-			})
-		}
-
-		if err != nil {
-			return
-		}
-
-		response := sortChirps(chirpz, se)
-
-		respondwithJSON(w, http.StatusOK, response)
-	} else {
-
-		dbChirps, err := cfg.DB.GetChirps()
-		if err != nil {
-			respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps")
-			return
-		}
-
-		response := []Chirp{}
-
-		for _, dbChirp := range dbChirps {
-			response = append(response, Chirp{
-				ID:   dbChirp.ID,
-				Body: dbChirp.Body,
-			})
-		}
-
-		response = sortChirps(response, se)
-
-		respondwithJSON(w, http.StatusOK, response)
+	if err != nil {
+		respondWithError(w, 500, "no chirps", nil)
+		return
 	}
+
+	var responses []response
+	for _, chirp := range chirps {
+		responseTmp := response{
+			Id:         chirp.ID,
+			Created_at: chirp.CreatedAt,
+			Updated_at: chirp.UpdatedAt,
+			Body:       chirp.Body,
+			User_id:    chirp.UserID,
+		}
+		responses = append(responses, responseTmp)
+	}
+
+	respondWithJson(w, http.StatusOK, responses)
 
 }
 
 func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		Id         uuid.UUID `json:"id"`
+		Created_at time.Time `json:"created_at"`
+		Updated_at time.Time `json:"updated_at"`
+		Body       string    `json:"body"`
+		User_id    uuid.UUID `json:"user_id"`
+	}
 
-	dbChirps, err := cfg.DB.GetChirps()
+	val, err := uuid.Parse(r.PathValue("id"))
 
 	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve chirps")
+		respondWithError(w, http.StatusInternalServerError, " invalid id", nil)
 		return
 	}
 
-	idString := r.PathValue("chirpsid")
-	id, err := strconv.Atoi(idString)
+	chirp, err := cfg.dbQueries.GetChirpId(r.Context(), val)
 
 	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "Couldn't retrieve with that id")
+		respondWithError(w, http.StatusInternalServerError, "no chirp", nil)
 		return
 	}
 
-	chirp := Chirp{}
-
-	if len(dbChirps) < id {
-		w.WriteHeader(http.StatusNotFound)
-	}
-
-	for _, dbChirp := range dbChirps {
-
-		if dbChirp.ID == id {
-			chirp = Chirp{
-				ID:        dbChirp.ID,
-				Body:      dbChirp.Body,
-				Author_id: dbChirp.Author_id,
-			}
-
-		}
-
-	}
-
-	respondwithJSON(w, http.StatusOK, chirp)
-}
-
-func sortChirps(chirps []Chirp, method string) []Chirp {
-
-	sort.Slice(chirps, func(i, j int) bool {
-
-		if method == "asc" {
-			return chirps[i].ID < chirps[j].ID
-		} else {
-			return chirps[i].ID > chirps[j].ID
-		}
+	respondWithJson(w, http.StatusOK, response{
+		Id:         chirp.ID,
+		Created_at: chirp.CreatedAt,
+		Updated_at: chirp.UpdatedAt,
+		Body:       chirp.Body,
+		User_id:    chirp.UserID,
 	})
-
-	return chirps
-
 }
