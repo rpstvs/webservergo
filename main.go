@@ -26,7 +26,7 @@ func main() {
 	mux.Handle("/app/*", http.StripPrefix("/app", apiCfg.midlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
-	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
+	mux.HandleFunc("GET /api/chirps", apiCfg.RetrieveChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpsid}", apiCfg.retrieveChirpsId)
 	mux.HandleFunc("DELETE /api/chirps/{chirpsid}", apiCfg.DeleteChirp)
 
