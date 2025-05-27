@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"encoding/json"
 	"net/http"
@@ -62,3 +63,5 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		ID:    updated.ID,
 	})
 }
+
+*/

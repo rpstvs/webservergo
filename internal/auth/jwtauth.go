@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -33,7 +35,7 @@ func CreateToken(userid uuid.UUID, tokenSecret string, expiresIn time.Duration) 
 
 }
 
-func CreateRefreshToken(id int, tokenSecret string) (string, error) {
+func CreateRefreshToken(userid uuid.UUID, tokenSecret string) (string, error) {
 
 	signinKey := []byte(tokenSecret)
 
@@ -41,7 +43,7 @@ func CreateRefreshToken(id int, tokenSecret string) (string, error) {
 		Issuer:    "chirpy-refresh",
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(60 * 24 * time.Hour)),
-		Subject:   fmt.Sprintf("%d", id),
+		Subject:   string(userid.String()),
 	})
 
 	return token.SignedString(signinKey)
@@ -116,4 +118,17 @@ func GetBearerToken(headers http.Header) (string, error) {
 	}
 
 	return parts[1], nil
+}
+
+func MakeRefreshToken() (string, error) {
+	buffer := make([]byte, 32)
+	_, err := rand.Read(buffer)
+
+	if err != nil {
+		return "", err
+
+	}
+	refreshToken := hex.EncodeToString(buffer)
+
+	return refreshToken, nil
 }

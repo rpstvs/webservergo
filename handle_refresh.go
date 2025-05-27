@@ -17,22 +17,22 @@ func (cfg *apiConfig) refresh(w http.ResponseWriter, r *http.Request) {
 
 	refToken := CheckRefreshToken(tokenString)
 
-	issuer, _ := auth.GetIssuerr(refToken, cfg.secret)
+	issuer, _ := auth.GetIssuerr(refToken, cfg.tokenSecret)
 
 	tokenDb, _ := cfg.DB.GetToken(refToken)
 
 	fmt.Println(issuer)
 
 	if issuer == "chirpy-refresh" && !tokenDb.Revoke {
-		idString, _ := auth.ValidateToken(refToken, cfg.secret)
+		idString, _ := auth.ValidateJWT(refToken, cfg.tokenSecret)
 		id, _ := strconv.Atoi(idString)
-		token, _ := auth.CreateToken(id, cfg.secret)
+		token, _ := auth.CreateToken(id, cfg.tokenSecret)
 
-		respondwithJSON(w, http.StatusOK, response{
+		respondWithJson(w, http.StatusOK, response{
 			Token: token,
 		})
 	} else {
-		respondwithError(w, http.StatusUnauthorized, "Not valid refresh token")
+		respondWithError(w, http.StatusUnauthorized, "Not valid refresh token", nil)
 	}
 
 }

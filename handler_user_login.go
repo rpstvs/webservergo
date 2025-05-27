@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
-	"github.com/rpstvs/webservergo/internals/auth"
+	"github.com/rpstvs/webservergo/internal/auth"
 )
 
 func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,16 +43,15 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userToken, _ := auth.CreateToken(userLogging.ID, cfg.tokenSecret)
-	refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.tokenSecret)
+	userToken, _ := auth.CreateToken(userLogging.ID, cfg.tokenSecret, 60*time.Minute)
+	//refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.tokenSecret)
 
 	respondWithJson(w, http.StatusOK, response{
 		User: User{
 			ID:    userLogging.ID,
 			Email: userLogging.Email,
 		},
-		Token:        userToken,
-		RefreshToken: refreshToken,
+		Token: userToken,
 	})
 
 }

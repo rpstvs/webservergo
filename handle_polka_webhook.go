@@ -1,10 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"net/http"
-)
-
+/*
 func (cfg *apiConfig) PolkaHandler(w http.ResponseWriter, r *http.Request) {
 
 	type PaymentEvent struct {
@@ -39,14 +35,15 @@ func (cfg *apiConfig) PolkaHandler(w http.ResponseWriter, r *http.Request) {
 			err = cfg.DB.UpgradeUser(params.Data.UserID)
 
 			if err != nil {
-				respondwithError(w, http.StatusNotFound, "user not found")
+				respondWithError(w, http.StatusNotFound, "user not found", nil)
 			}
 
 			w.WriteHeader(http.StatusOK)
 		}
 
 	} else {
-		respondwithError(w, http.StatusUnauthorized, "Not Authorized")
+		respondWithError(w, http.StatusUnauthorized, "Not Authorized", nil)
 		return
 	}
 }
+*/

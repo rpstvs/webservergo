@@ -1,10 +1,11 @@
 package main
 
+/*
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/rpstvs/webservergo/internals/auth"
+	"github.com/rpstvs/webservergo/internal/auth"
 )
 
 func (cfg *apiConfig) DeleteChirp(w http.ResponseWriter, r *http.Request) {
@@ -39,3 +40,4 @@ func (cfg *apiConfig) DeleteChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+*/
