@@ -44,14 +44,15 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userToken, _ := auth.CreateToken(userLogging.ID, cfg.tokenSecret, 60*time.Minute)
-	//refreshToken, _ := auth.CreateRefreshToken(userLogging.ID, cfg.tokenSecret)
+	refreshToken, _ := auth.MakeRefreshToken()
 
 	respondWithJson(w, http.StatusOK, response{
 		User: User{
 			ID:    userLogging.ID,
 			Email: userLogging.Email,
 		},
-		Token: userToken,
+		Token:        userToken,
+		RefreshToken: refreshToken,
 	})
 
 }
