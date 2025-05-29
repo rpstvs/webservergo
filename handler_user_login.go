@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rpstvs/webservergo/internal/auth"
+	"github.com/rpstvs/webservergo/internal/database"
 )
 
 func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,8 +44,30 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userToken, _ := auth.CreateToken(userLogging.ID, cfg.tokenSecret, 60*time.Minute)
-	refreshToken, _ := auth.MakeRefreshToken()
+	userToken, err := auth.CreateToken(userLogging.ID, cfg.tokenSecret, time.Hour)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldnt create access jwt", nil)
+		return
+	}
+
+	refreshToken, err := auth.MakeRefreshToken()
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldnt create refresh token", nil)
+		return
+	}
+
+	_, err = cfg.dbQueries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		Token:     refreshToken,
+		UserID:    userLogging.ID,
+		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldnt save refresh token", nil)
+		return
+	}
 
 	respondWithJson(w, http.StatusOK, response{
 		User: User{
