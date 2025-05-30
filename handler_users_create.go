@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rpstvs/webservergo/internal/auth"
 	"github.com/rpstvs/webservergo/internal/database"
-	"github.com/rpstvs/webservergo/internals/auth"
 )
 
 type User struct {

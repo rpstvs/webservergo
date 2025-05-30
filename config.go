@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"sync/atomic"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/rpstvs/webservergo/internal/database"
 )
 
@@ -19,8 +21,8 @@ func GetConfig() apiConfig {
 	}
 
 	dbURL := os.Getenv("DB_URL")
-
-	db, err := sql.Open("Postgres", dbURL)
+	fmt.Println(dbURL)
+	db, err := sql.Open("postgres", dbURL)
 
 	if err != nil {
 		log.Fatal("Couldnt open DB connection")

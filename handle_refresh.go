@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
+	"time"
 
 	"github.com/rpstvs/webservergo/internal/auth"
 )
@@ -13,46 +12,49 @@ func (cfg *apiConfig) refresh(w http.ResponseWriter, r *http.Request) {
 		Token string `json:"token"`
 	}
 
-	tokenString := r.Header.Get("Authorization")
-
-	refToken := CheckRefreshToken(tokenString)
-
-	issuer, _ := auth.GetIssuerr(refToken, cfg.tokenSecret)
-
-	tokenDb, _ := cfg.DB.GetToken(refToken)
-
-	fmt.Println(issuer)
-
-	if issuer == "chirpy-refresh" && !tokenDb.Revoke {
-		idString, _ := auth.ValidateJWT(refToken, cfg.tokenSecret)
-		id, _ := strconv.Atoi(idString)
-		token, _ := auth.CreateToken(id, cfg.tokenSecret)
-
-		respondWithJson(w, http.StatusOK, response{
-			Token: token,
-		})
-	} else {
-		respondWithError(w, http.StatusUnauthorized, "Not valid refresh token", nil)
+	tokenString, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldnt get refresh token from header", nil)
+		return
 	}
+
+	user, err := cfg.dbQueries.GetUserFromRefreshToken(r.Context(), tokenString)
+
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "No refresh token", nil)
+
+		return
+	}
+
+	accessToken, err := auth.CreateToken(user.ID, cfg.tokenSecret, time.Hour)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldt create token", nil)
+		return
+	}
+
+	respondWithJson(w, http.StatusOK, response{
+		Token: accessToken,
+	})
 
 }
 
 func (cfg *apiConfig) revoke(w http.ResponseWriter, r *http.Request) {
 
-	tokenString := r.Header.Get("Authorization")
+	tokenString, err := auth.GetBearerToken(r.Header)
 
-	token := CheckRefreshToken(tokenString)
-
-	cfg.DB.RevokeToken(token)
-
-}
-
-func CheckRefreshToken(token string) string {
-	if token == "" {
-		return ""
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "no refresh token", nil)
+		return
 	}
 
-	tokenString := token[len("Bearer "):]
+	_, err = cfg.dbQueries.RevokeRefreshToken(r.Context(), tokenString)
 
-	return tokenString
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "cant revoke token", nil)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+
 }
