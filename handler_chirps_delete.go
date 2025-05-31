@@ -1,43 +1,48 @@
 package main
 
-/*
 import (
 	"net/http"
-	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/rpstvs/webservergo/internal/auth"
 )
 
 func (cfg *apiConfig) DeleteChirp(w http.ResponseWriter, r *http.Request) {
-	dbChirps, _ := cfg.DB.GetChirps()
 
-	tokenString := r.Header.Get("Authorization")
+	tokenString, err := auth.GetBearerToken(r.Header)
 
-	if tokenString == "" {
-		respondwithError(w, http.StatusUnauthorized, "Missing authorization")
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "no token on request", nil)
 		return
 	}
 
-	tokenString = tokenString[len("Bearer "):]
-	id, _ := auth.ValidateToken(tokenString, cfg.secret)
-
-	author_id, _ := strconv.Atoi(id)
-
-	id2 := r.PathValue("chirpsid")
-	chirpId, _ := strconv.Atoi(id2)
-
-	if chirpId > len(dbChirps) {
-		w.WriteHeader(http.StatusNotFound)
+	if tokenString == "" {
+		respondWithError(w, http.StatusUnauthorized, "Missing authorization", nil)
+		return
 	}
 
-	chirp, _ := cfg.DB.GetChirpById(chirpId)
+	id, err := auth.ValidateJWT(tokenString, cfg.tokenSecret)
 
-	if chirp.Author_id == author_id {
-		cfg.DB.DeleteChirp(chirpId)
-		w.WriteHeader(http.StatusOK)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "token not valid", nil)
+		return
+	}
+
+	id2 := r.PathValue("chirpID")
+	chirpId, _ := uuid.Parse(id2)
+
+	chirp, err := cfg.dbQueries.GetChirpId(r.Context(), chirpId)
+
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "chirp not found", nil)
+		return
+	}
+
+	if chirp.UserID == id {
+		cfg.dbQueries.DeleteChirp(r.Context(), chirpId)
+		w.WriteHeader(http.StatusNoContent)
 	} else {
-		respondwithError(w, http.StatusForbidden, "Forbidden")
+		respondWithError(w, http.StatusForbidden, "Forbidden", nil)
 	}
 
 }
-*/

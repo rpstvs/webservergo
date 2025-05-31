@@ -35,9 +35,10 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "user not found", nil)
+		return
 	}
 
-	err = auth.CheckPasswordHash(params.Password, params.Password)
+	err = auth.CheckPasswordHash(params.Password, userLogging.HashedPassword)
 
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "not authorized", nil)

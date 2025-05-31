@@ -8,4 +8,4 @@ CREATE TABLE refresh_tokens(
     revoked_at TIMESTAMP
 );
 -- +goose Down
-DROP TABLE refresh_tokens
+DROP TABLE refresh_tokens;

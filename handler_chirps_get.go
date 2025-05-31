@@ -48,7 +48,7 @@ func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
 		User_id    uuid.UUID `json:"user_id"`
 	}
 
-	val, err := uuid.Parse(r.PathValue("id"))
+	val, err := uuid.Parse(r.PathValue("chirpID"))
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, " invalid id", nil)
@@ -58,7 +58,7 @@ func (cfg *apiConfig) retrieveChirpsId(w http.ResponseWriter, r *http.Request) {
 	chirp, err := cfg.dbQueries.GetChirpId(r.Context(), val)
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "no chirp", nil)
+		respondWithError(w, http.StatusNotFound, "no chirp", nil)
 		return
 	}
 

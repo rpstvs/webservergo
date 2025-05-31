@@ -1,12 +1,11 @@
 package main
 
-/*
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
-	"github.com/rpstvs/webservergo/internals/auth"
+	"github.com/rpstvs/webservergo/internal/auth"
+	"github.com/rpstvs/webservergo/internal/database"
 )
 
 func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -22,46 +21,43 @@ func (cfg *apiConfig) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&params)
 
 	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "couldnt decode parameters")
+		respondWithError(w, http.StatusInternalServerError, "couldnt decode parameters", nil)
 		return
 	}
 
-	tokenString := r.Header.Get("Authorization")
-
-	if tokenString == "" {
-		respondwithError(w, http.StatusUnauthorized, "Missing authorization")
-		return
-	}
-
-	tokenString = tokenString[len("Bearer "):]
-
-	id, err := auth.ValidateToken(tokenString, cfg.secret)
+	tokenString, err := auth.GetBearerToken(r.Header)
 
 	if err != nil {
-		respondwithError(w, http.StatusUnauthorized, "este burro nao entra")
+		respondWithError(w, http.StatusUnauthorized, "couldt get token", nil)
 		return
 	}
 
-	issuer, _ := auth.GetIssuerr(tokenString, cfg.secret)
+	if tokenString == "" {
+		respondWithError(w, http.StatusUnauthorized, "Missing authorization", nil)
+		return
+	}
 
-	if issuer == "chirpy-refresh" {
-		respondwithError(w, http.StatusUnauthorized, "token invalido")
+	id, err := auth.ValidateJWT(tokenString, cfg.tokenSecret)
+
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "token not valid", nil)
+		return
 	}
 
 	passHashed, _ := auth.PassHash(params.Password)
-	realId, _ := strconv.Atoi(id)
 
-	updated, err := cfg.DB.UpdateUser(realId, params.Email, passHashed)
-
+	updated, err := cfg.dbQueries.UpdateUser(r.Context(), database.UpdateUserParams{
+		Email:          params.Email,
+		HashedPassword: passHashed,
+		ID:             id,
+	})
 	if err != nil {
-		respondwithError(w, http.StatusInternalServerError, "nao deu")
+		respondWithError(w, http.StatusInternalServerError, "nao deu", nil)
 		return
 	}
 
-	respondwithJSON(w, http.StatusOK, User{
+	respondWithJson(w, http.StatusOK, User{
 		Email: params.Email,
 		ID:    updated.ID,
 	})
 }
-
-*/

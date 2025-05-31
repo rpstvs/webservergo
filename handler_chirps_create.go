@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -41,9 +40,9 @@ func (api *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 		respondWithError(w, http.StatusBadRequest, "No token", nil)
 		return
 	}
-	fmt.Println(token)
+
 	user, err := auth.ValidateJWT(token, api.tokenSecret)
-	fmt.Println(err)
+
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "unauthorized", nil)
 		return

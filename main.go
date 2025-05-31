@@ -27,14 +27,14 @@ func main() {
 
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET /api/chirps", apiCfg.RetrieveChirps)
-	mux.HandleFunc("GET /api/chirps/{chirpsid}", apiCfg.retrieveChirpsId)
-	//mux.HandleFunc("DELETE /api/chirps/{chirpsid}", apiCfg.DeleteChirp)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.retrieveChirpsId)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.DeleteChirp)
 
 	//mux.HandleFunc("POST /api/polka/webhooks", apiCfg.PolkaHandler)
 
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("POST /api/login", apiCfg.loginHandler)
-	//mux.HandleFunc("PUT /api/users", apiCfg.UpdateUser)
+	mux.HandleFunc("PUT /api/users", apiCfg.UpdateUser)
 
 	mux.HandleFunc("POST /api/refresh", apiCfg.refresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.revoke)

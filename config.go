@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"sync/atomic"
@@ -21,7 +20,7 @@ func GetConfig() apiConfig {
 	}
 
 	dbURL := os.Getenv("DB_URL")
-	fmt.Println(dbURL)
+
 	db, err := sql.Open("postgres", dbURL)
 
 	if err != nil {
