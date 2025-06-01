@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,11 +12,12 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Email       string    `json:"email"`
+	Password    string    `json:"-"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
 }
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
@@ -24,12 +26,7 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	type returnVals struct {
-		Id         uuid.UUID `json:"id"`
-		Created_at time.Time `json:"created_at"`
-		Updated_at time.Time `json:"updated_at"`
-		Email      string    `json:"email"`
-	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 
@@ -51,11 +48,12 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, http.StatusInternalServerError, "couldn't create user in db", nil)
 		return
 	}
-
-	respondWithJson(w, 201, returnVals{
-		Id:         user.ID,
-		Created_at: user.CreatedAt,
-		Updated_at: user.UpdatedAt,
-		Email:      user.Email,
+	log.Printf("User added %s \n", user.ID.String())
+	respondWithJson(w, 201, User{
+		ID:          user.ID,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		Email:       user.Email,
+		IsChirpyRed: user.IsChirpyRed,
 	})
 }

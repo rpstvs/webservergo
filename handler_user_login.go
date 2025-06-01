@@ -72,8 +72,9 @@ func (cfg *apiConfig) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJson(w, http.StatusOK, response{
 		User: User{
-			ID:    userLogging.ID,
-			Email: userLogging.Email,
+			ID:          userLogging.ID,
+			Email:       userLogging.Email,
+			IsChirpyRed: userLogging.IsChirpyRed,
 		},
 		Token:        userToken,
 		RefreshToken: refreshToken,

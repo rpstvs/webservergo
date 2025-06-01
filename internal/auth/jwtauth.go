@@ -132,3 +132,19 @@ func MakeRefreshToken() (string, error) {
 
 	return refreshToken, nil
 }
+
+func GetAPIKey(headers http.Header) (string, error) {
+	bearer := headers.Get("Authorization")
+
+	if bearer == "" {
+		return "", errors.New("no token")
+	}
+
+	parts := strings.Split(bearer, " ")
+
+	if len(parts) != 2 {
+		return "", errors.New("malformed auth token")
+	}
+
+	return parts[1], nil
+}

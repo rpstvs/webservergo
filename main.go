@@ -12,6 +12,7 @@ type apiConfig struct {
 	dbQueries      *database.Queries
 	Platform       string
 	tokenSecret    string
+	PolkaKey       string
 }
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.retrieveChirpsId)
 	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.DeleteChirp)
 
-	//mux.HandleFunc("POST /api/polka/webhooks", apiCfg.PolkaHandler)
+	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.PolkaHandler)
 
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
 	mux.HandleFunc("POST /api/login", apiCfg.loginHandler)

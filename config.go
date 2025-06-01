@@ -32,5 +32,6 @@ func GetConfig() apiConfig {
 		tokenSecret:    os.Getenv("TOKEN_SECRET"),
 		dbQueries:      database.New(db),
 		fileServerHits: atomic.Int32{},
+		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 }
