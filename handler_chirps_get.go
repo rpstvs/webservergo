@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,8 +24,26 @@ func (cfg *apiConfig) RetrieveChirps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	authorId := uuid.Nil
+
+	authorIDString := r.URL.Query().Get("author_id")
+	sorting := r.URL.Query().Get("sort")
+
+	if authorIDString != "" {
+		authorId, err = uuid.Parse(authorIDString)
+
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid author ID", err)
+			return
+		}
+
+	}
+
 	var responses []response
 	for _, chirp := range chirps {
+		if authorId != uuid.Nil && chirp.UserID != authorId {
+			continue
+		}
 		responseTmp := response{
 			Id:         chirp.ID,
 			Created_at: chirp.CreatedAt,
@@ -34,6 +53,13 @@ func (cfg *apiConfig) RetrieveChirps(w http.ResponseWriter, r *http.Request) {
 		}
 		responses = append(responses, responseTmp)
 	}
+
+	sort.Slice(responses, func(i, j int) bool {
+		if sorting == "desc" {
+			return responses[i].Created_at.After(responses[j].Updated_at)
+		}
+		return responses[i].Created_at.Before(responses[j].Updated_at)
+	})
 
 	respondWithJson(w, http.StatusOK, responses)
 
